@@ -32,7 +32,7 @@ Helios calcola un **Indice di Priorità di Intervento** basato sulla seguente lo
 
 > **RISCHIO = (SUHI Ambientale) x (Vettore Vulnerabilità)**
 
-### 1. Layer Ambientale (Latitudo 40)
+### 1. Layer Ambientale (Latitude 40)
 Utilizziamo i dati satellitari Sentinel-2 elaborati dall'AI di Latitude 40:
 * **SUHI (Surface Urban Heat Island):** Identifica con precisione le zone dove asfalto e cemento trattengono il calore.
 
