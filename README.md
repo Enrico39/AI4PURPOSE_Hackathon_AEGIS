@@ -1,14 +1,14 @@
 # AI4PURPOSE_Hackathon_AEGIS
 
 # ☀️ HELIOS
-### AI-Driven Heatwave Response System
+### Heat Emergency Localized Intelligence Operating System
 **Team AEGIS | AI4PURPOSE Hackathon 2026**
 
 ![Helios Banner](https://img.shields.io/badge/HELIOS-AI%20Protection-orange?style=for-the-badge) 
 ![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=flat&logo=python)
 ![Status](https://img.shields.io/badge/Status-Prototype-green?style=flat)
 
-> **"Heat Emergency Localized Intelligence Operating System"**
+> **"Il caldo non colpisce a caso. Colpisce chirurgicamente."**
 
 ---
 
