@@ -2,9 +2,12 @@
 ### Heat Emergency Localized Intelligence Operating System
 **Team AEGIS | AI4PURPOSE Hackathon 2026**
 
-> **"Il caldo non colpisce a caso. Colpisce chirurgicamente."**
+> **"Le ondate di calore: una minaccia silenziosa."**
 
 ---
+
+[**Prova la DashboHelios ora.**](https://github.com/)
+
 
 ## 🚨 Il Problema
 Le ondate di calore sono il "killer silenzioso" del cambiamento climatico. Attualmente, i piani di emergenza si basano su allerte meteo generiche rivolte all'intera popolazione. Questo approccio reattivo porta a:
@@ -32,7 +35,6 @@ Helios calcola un **Indice di Priorità di Intervento** basato sulla seguente lo
 ### 1. Layer Ambientale (Latitudo 40)
 Utilizziamo i dati satellitari Sentinel-2 elaborati dall'AI di Latitudo 40:
 * **SUHI (Surface Urban Heat Island):** Identifica con precisione (10m) le zone dove asfalto e cemento trattengono il calore.
-* **HPR (Heatwave Risk):** Analisi morfologica del rischio urbano.
 
 ### 2. Layer Sanitario (Simulazione So.Re.Sa.)
 Il sistema interroga l'Anagrafe Fragilità per identificare 4 cluster critici:
