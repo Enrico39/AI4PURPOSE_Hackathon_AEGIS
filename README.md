@@ -6,7 +6,7 @@
 
 ---
 
-[**Prova la DashboHelios ora.**](https://github.com/)
+[**Prova ora la Dashboboard di Helios!**](https://github.com/)
 
 
 ## 🚨 Il Problema
@@ -19,7 +19,7 @@ Le ondate di calore sono il "killer silenzioso" del cambiamento climatico. Attua
 **Helios** non è una semplice app meteo. È un sistema operativo di **Data Fusion** che trasforma la gestione delle ondate di calore da reattiva a **predittiva**.
 
 Il sistema incrocia in tempo reale due layer di dati fondamentali:
-1.  **Dato Ambientale (Fisica):** L'intensità delle Isole di Calore Urbane (**SUHI**) fornita dai satelliti di **Latitudo 40**.
+1.  **Dato Ambientale (Fisica):** L'intensità delle Isole di Calore Urbane (**SUHI**) fornita dai satelliti di **Latitude 40**.
 2.  **Dato Clinico (Biologia):** Il profilo di vulnerabilità dei cittadini estratto dai database sanitari regionali (**So.Re.Sa**).
 
 Il risultato è una **mappa di rischio chirurgica** che permette alla Protezione Civile e al 118 di intervenire *prima* che si verifichi l'emergenza clinica.
@@ -55,11 +55,10 @@ Il cuore di Helios è la **Command Room Dashboard**, che visualizza:
 | **WATCHLIST** | 🟠 **Arancio** | Paziente Fragile in Zona Sicura | **Monitoraggio Attivo (SMS/Call)** |
 | **SAFE ZONE** | 🟢 **Verde** | Paziente non a rischio / Zona Fresca | Nessuna azione (Risparmio Risorse) |
 
-*(Inserire qui screenshot della mappa generata dallo script)*
 
 ---
 
-# 🔒 Privacy & GDPR Compliance
+## 🔒 Privacy & GDPR Compliance
 
 Helios è progettato secondo i principi di **Privacy by Design** per garantire la protezione dei dati sensibili (So.Re.Sa.):
 
