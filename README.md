@@ -33,8 +33,8 @@ Helios calcola un **Indice di Priorità di Intervento** basato sulla seguente lo
 > **RISCHIO = (SUHI Ambientale) x (Vettore Vulnerabilità)**
 
 ### 1. Layer Ambientale (Latitudo 40)
-Utilizziamo i dati satellitari Sentinel-2 elaborati dall'AI di Latitudo 40:
-* **SUHI (Surface Urban Heat Island):** Identifica con precisione (10m) le zone dove asfalto e cemento trattengono il calore.
+Utilizziamo i dati satellitari Sentinel-2 elaborati dall'AI di Latitude 40:
+* **SUHI (Surface Urban Heat Island):** Identifica con precisione le zone dove asfalto e cemento trattengono il calore.
 
 ### 2. Layer Sanitario (Simulazione So.Re.Sa.)
 Il sistema interroga l'Anagrafe Fragilità per identificare diversi cluster critici come:
@@ -55,12 +55,13 @@ Il cuore di Helios è la **Command Dashboard**, che visualizza:
 | **WATCHLIST** | 🟠 **Arancio** | Paziente Fragile in Zona a Rischio | **Monitoraggio Attivo (SMS/Call)** |
 | **SAFE ZONE** | 🟢 **Verde** | Paziente non a rischio / Zona Fresca | Nessuna azione (Risparmio Risorse) |
 
+Un agente IA interpola i dati e  consiglia come agire nelle zone più a rischio.
 
 ---
 
 ## 🔒 Privacy & GDPR Compliance
 
-Helios è progettato secondo i principi di **Privacy by Design** per garantire la protezione dei dati sensibili (So.Re.Sa.):
+Helios è progettato secondo i principi di **Privacy by Design** per garantire la protezione dei dati sensibili:
 
 - **Separazione dei Dati**:  
   Il layer ambientale (Latitudo 40) è pubblico/anonimo. Il layer sanitario resta confinato nei server sicuri regionali.
