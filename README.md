@@ -8,7 +8,7 @@
 ![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=flat&logo=python)
 ![Status](https://img.shields.io/badge/Status-Prototype-green?style=flat)
 
-> **"Il caldo non colpisce a caso. Colpisce chirurgicamente."**
+> **"Heat Emergency Localized Intelligence Operating System"**
 
 ---
 
@@ -63,19 +63,26 @@ Il cuore di Helios è la **Command Room Dashboard**, che visualizza:
 
 ---
 
-## 🛠️ Tech Stack
-* **Core:** Python 3.9+
-* **Geospatial Analysis:** `Rasterio`, `NumPy`
-* **Data Visualization:** `Matplotlib`
-* **Data Source:** Latitudo 40 Data Pack (Sentinel-2 Processed), Mock Data Generator (Privacy Compliant).
+# 🔒 Privacy & GDPR Compliance
+
+Helios è progettato secondo i principi di **Privacy by Design** per garantire la protezione dei dati sensibili (So.Re.Sa.):
+
+- **Separazione dei Dati**:  
+  Il layer ambientale (Latitudo 40) è pubblico/anonimo. Il layer sanitario resta confinato nei server sicuri regionali.
+
+- **Pseudo-Anonimizzazione**:  
+  L'algoritmo di incrocio lavora su ID numerici criptati, non su nominativi in chiaro.
+
+- **Last Mile Decryption**:  
+  L'identità del paziente e l'indirizzo esatto vengono decriptati solo sul tablet dell'operatore di soccorso nel momento in cui scatta un intervento effettivo.
+
+## 👥 Team AEGIS
+- **Beniamino Nardone**   
+- **Enrico Madonna**   
+- **Lorenzo Mazza**   
+- **Maria Carmela Vitale**   
+
 
 ---
 
-## 🚀 Installazione e Demo
-
-Per eseguire il motore decisionale di Helios e generare la Dashboard tattica in locale:
-
-### 1. Clona il repository
-```bash
-git clone [https://github.com/TuoUsername/Helios-Project.git](https://github.com/TuoUsername/Helios-Project.git)
-cd Helios-Project
+Developed with ❤️ for **AI4PURPOSE Hackathon 2026 – Napoli**
