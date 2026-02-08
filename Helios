@@ -1,0 +1,2751 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HELIOS Dashboard - Team Aegis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f1419;
+            color: #e7e9ea;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a1f26 0%, #0f1419 100%);
+            border-bottom: 1px solid #2f3336;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+            z-index: 1000;
+            position: relative;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffcc02 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 20px;
+            color: #0f1419;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .brand-name {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #ff6b35, #ffcc02);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+        }
+
+        .brand-subtitle {
+            font-size: 11px;
+            color: #71767b;
+            letter-spacing: 1px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .status-badge {
+            background: rgba(0, 186, 124, 0.15);
+            color: #00ba7c;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .status-badge:hover {
+            background: rgba(0, 186, 124, 0.25);
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #00ba7c;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        .datetime {
+            text-align: right;
+            font-size: 13px;
+            color: #71767b;
+        }
+
+        .datetime .time {
+            font-size: 18px;
+            font-weight: 600;
+            color: #e7e9ea;
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 64px);
+        }
+
+        /* Left Sidebar */
+        .sidebar-left {
+            width: 280px;
+            background: #16181c;
+            border-right: 1px solid #2f3336;
+            padding: 20px;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .sidebar-left::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-left::-webkit-scrollbar-track {
+            background: #1d1f23;
+        }
+
+        .sidebar-left::-webkit-scrollbar-thumb {
+            background: #3f4448;
+            border-radius: 3px;
+        }
+
+        .filter-section {
+            margin-bottom: 24px;
+        }
+
+        .filter-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #71767b;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 10px 14px;
+            background: #1d1f23;
+            border: 1px solid #2f3336;
+            border-radius: 8px;
+            color: #e7e9ea;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2371767b' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+
+        .filter-select:hover {
+            border-color: #ff6b35;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #ff6b35;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        .time-slider {
+            margin-top: 10px;
+        }
+
+        .time-slider input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #2f3336;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .time-slider input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(255, 107, 53, 0.4);
+            transition: transform 0.2s;
+        }
+
+        .time-slider input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        .time-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #71767b;
+            margin-top: 8px;
+        }
+
+        .current-time-display {
+            text-align: center;
+            font-size: 13px;
+            color: #ff6b35;
+            font-weight: 600;
+            margin-top: 8px;
+            padding: 6px;
+            background: rgba(255, 107, 53, 0.1);
+            border-radius: 6px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #1d1f23;
+            border-radius: 10px;
+            padding: 14px;
+            border: 1px solid #2f3336;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-card.danger {
+            border-color: #f4212e;
+            background: rgba(244, 33, 46, 0.1);
+        }
+
+        .stat-card.danger:hover {
+            background: rgba(244, 33, 46, 0.15);
+        }
+
+        .stat-card.warning {
+            border-color: #ff6b35;
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .stat-card.warning:hover {
+            background: rgba(255, 107, 53, 0.15);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .stat-card.danger .stat-value {
+            color: #f4212e;
+        }
+
+        .stat-card.warning .stat-value {
+            color: #ff6b35;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #71767b;
+            margin-top: 4px;
+        }
+
+        /* Legend */
+        .legend {
+            background: #1d1f23;
+            border-radius: 10px;
+            padding: 16px;
+            border: 1px solid #2f3336;
+        }
+
+        .legend-title {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            padding: 6px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .legend-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .legend-item.active {
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .legend-color.red { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+        .legend-color.orange { background: linear-gradient(135deg, #f97316, #ea580c); }
+        .legend-color.yellow { background: linear-gradient(135deg, #facc15, #eab308); }
+        .legend-color.green { background: linear-gradient(135deg, #22c55e, #16a34a); }
+
+        /* Map Section */
+        .map-section {
+            flex: 1;
+            position: relative;
+            background: #0a0c0f;
+            overflow: hidden;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Custom Leaflet styles */
+        .leaflet-container {
+            background: #0a0c0f;
+        }
+
+        .leaflet-control-zoom {
+            display: none;
+        }
+
+        .leaflet-control-attribution {
+            background: rgba(22, 24, 28, 0.9) !important;
+            color: #71767b !important;
+            font-size: 10px !important;
+        }
+
+        .leaflet-control-attribution a {
+            color: #ff6b35 !important;
+        }
+
+        /* Custom Map Controls */
+        .map-controls {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 1000;
+        }
+
+        .map-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(22, 24, 28, 0.95);
+            border: 1px solid #2f3336;
+            border-radius: 8px;
+            color: #e7e9ea;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .map-btn:hover {
+            background: rgba(45, 47, 51, 0.95);
+            border-color: #ff6b35;
+            color: #ff6b35;
+        }
+
+        .map-btn.active {
+            background: rgba(255, 107, 53, 0.2);
+            border-color: #ff6b35;
+            color: #ff6b35;
+        }
+
+        /* Layer Toggle Panel */
+        .layer-panel {
+            position: absolute;
+            top: 16px;
+            left: 70px;
+            background: rgba(22, 24, 28, 0.95);
+            border: 1px solid #2f3336;
+            border-radius: 10px;
+            padding: 16px;
+            z-index: 1000;
+            display: none;
+            min-width: 200px;
+        }
+
+        .layer-panel.show {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .layer-panel-title {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #e7e9ea;
+        }
+
+        .layer-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 4px;
+        }
+
+        .layer-option:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .layer-checkbox {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            border: 2px solid #3f4448;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .layer-option.active .layer-checkbox {
+            background: #ff6b35;
+            border-color: #ff6b35;
+        }
+
+        .layer-option.active .layer-checkbox::after {
+            content: '✓';
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .layer-label {
+            font-size: 13px;
+            color: #e7e9ea;
+        }
+
+        /* Info Panel */
+        .info-panel {
+            position: absolute;
+            bottom: 100px;
+            left: 16px;
+            background: rgba(22, 24, 28, 0.95);
+            border: 1px solid #2f3336;
+            border-radius: 10px;
+            padding: 16px;
+            z-index: 1000;
+            min-width: 250px;
+            display: none;
+        }
+
+        .info-panel.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .info-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .info-panel-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .info-panel-close {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #71767b;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .info-panel-close:hover {
+            background: rgba(244, 33, 46, 0.2);
+            color: #f4212e;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #2f3336;
+            font-size: 13px;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #71767b;
+        }
+
+        .info-value {
+            font-weight: 600;
+        }
+
+        .info-value.critical {
+            color: #f4212e;
+        }
+
+        .info-value.high {
+            color: #f97316;
+        }
+
+        /* Forecast Timeline */
+        .forecast-bar {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            right: 16px;
+            background: rgba(22, 24, 28, 0.95);
+            border-radius: 12px;
+            padding: 14px 20px;
+            border: 1px solid #2f3336;
+            z-index: 1000;
+        }
+
+        .forecast-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .forecast-title {
+            font-size: 11px;
+            color: #71767b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .forecast-date {
+            font-size: 12px;
+            color: #ff6b35;
+            font-weight: 500;
+        }
+
+        .forecast-hours {
+            display: flex;
+            gap: 8px;
+        }
+
+        .forecast-hour {
+            flex: 1;
+            text-align: center;
+            padding: 10px 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .forecast-hour:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #2f3336;
+        }
+
+        .forecast-hour.active {
+            background: rgba(255, 107, 53, 0.15);
+            border: 1px solid #ff6b35;
+        }
+
+        .forecast-time {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #e7e9ea;
+        }
+
+        .forecast-temp {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .forecast-hour.active .forecast-temp {
+            color: #ff6b35;
+        }
+
+        .forecast-risk {
+            font-size: 9px;
+            margin-top: 6px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .forecast-risk.critical {
+            background: rgba(220, 38, 38, 0.3);
+            color: #f87171;
+        }
+
+        .forecast-risk.high {
+            background: rgba(249, 115, 22, 0.3);
+            color: #fb923c;
+        }
+
+        .forecast-risk.medium {
+            background: rgba(250, 204, 21, 0.3);
+            color: #fde047;
+        }
+
+        .forecast-risk.low {
+            background: rgba(34, 197, 94, 0.3);
+            color: #4ade80;
+        }
+
+        /* Right Sidebar */
+        .sidebar-right {
+            width: 360px;
+            background: #16181c;
+            border-left: 1px solid #2f3336;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .alerts-section {
+            padding: 20px;
+            border-bottom: 1px solid #2f3336;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .alerts-section::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .alerts-section::-webkit-scrollbar-track {
+            background: #1d1f23;
+        }
+
+        .alerts-section::-webkit-scrollbar-thumb {
+            background: #3f4448;
+            border-radius: 3px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            color: #f4212e;
+        }
+
+        .alert-count {
+            background: #f4212e;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        /* Alert Cards */
+        .alert-card {
+            background: #1d1f23;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+            border-left: 4px solid;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .alert-card:hover {
+            transform: translateX(4px);
+            background: #25282d;
+        }
+
+        .alert-card.selected {
+            background: #25282d;
+            box-shadow: 0 0 0 1px rgba(255, 107, 53, 0.5);
+        }
+
+        .alert-card.critical {
+            border-left-color: #dc2626;
+        }
+
+        .alert-card.high {
+            border-left-color: #f97316;
+        }
+
+        .alert-card.medium {
+            border-left-color: #facc15;
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .alert-zone {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .alert-risk-badge {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .alert-risk-badge.critical {
+            background: rgba(220, 38, 38, 0.2);
+            color: #f87171;
+        }
+
+        .alert-risk-badge.high {
+            background: rgba(249, 115, 22, 0.2);
+            color: #fb923c;
+        }
+
+        .alert-details {
+            display: flex;
+            gap: 16px;
+            font-size: 11px;
+            color: #71767b;
+            margin-bottom: 8px;
+        }
+
+        .alert-detail {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .alert-population {
+            font-size: 12px;
+            color: #e7e9ea;
+        }
+
+        .alert-population strong {
+            color: #f4212e;
+        }
+
+        .alert-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #2f3336;
+        }
+
+        .alert-action-btn {
+            flex: 1;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #2f3336;
+            background: transparent;
+            color: #e7e9ea;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .alert-action-btn:hover {
+            background: rgba(255, 107, 53, 0.1);
+            border-color: #ff6b35;
+            color: #ff6b35;
+        }
+
+        .alert-action-btn.primary {
+            background: rgba(255, 107, 53, 0.2);
+            border-color: #ff6b35;
+            color: #ff6b35;
+        }
+
+        /* Recommendations Section */
+        .recommendations-section {
+            padding: 20px;
+            border-bottom: 1px solid #2f3336;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        .section-title.ai i {
+            color: #a855f7;
+        }
+
+        .recommendation-card {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.2);
+        }
+
+        .recommendation-card.applied {
+            opacity: 0.6;
+            border-color: #22c55e;
+        }
+
+        .recommendation-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .recommendation-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(168, 85, 247, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #a855f7;
+            font-size: 14px;
+        }
+
+        .recommendation-title {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .recommendation-text {
+            font-size: 12px;
+            color: #a1a1aa;
+            line-height: 1.5;
+        }
+
+        .recommendation-apply {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+            padding: 6px 12px;
+            background: rgba(168, 85, 247, 0.2);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            border-radius: 6px;
+            color: #a855f7;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: fit-content;
+        }
+
+        .recommendation-apply:hover {
+            background: rgba(168, 85, 247, 0.3);
+        }
+
+        .recommendation-card.applied .recommendation-apply {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: rgba(34, 197, 94, 0.4);
+            color: #22c55e;
+        }
+
+        /* Chat Section */
+        .chat-section {
+            padding: 16px;
+            background: #1d1f23;
+            border-top: 1px solid #2f3336;
+        }
+
+        .chat-messages {
+            max-height: 120px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .chat-messages.show {
+            display: block;
+        }
+
+        .chat-message {
+            padding: 10px 14px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            line-height: 1.4;
+            animation: messageIn 0.3s ease;
+        }
+
+        @keyframes messageIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-message.user {
+            background: rgba(255, 107, 53, 0.2);
+            margin-left: 40px;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-message.ai {
+            background: rgba(168, 85, 247, 0.15);
+            margin-right: 40px;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: #0f1419;
+            border: 1px solid #2f3336;
+            border-radius: 20px;
+            padding: 12px 18px;
+            color: #e7e9ea;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #a855f7;
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+        }
+
+        .chat-input::placeholder {
+            color: #71767b;
+        }
+
+        .chat-btn {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #a855f7, #8b5cf6);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .chat-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+        }
+
+        .chat-hint {
+            font-size: 10px;
+            color: #71767b;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        /* Notification Toast */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: rgba(22, 24, 28, 0.98);
+            border: 1px solid #2f3336;
+            border-radius: 10px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes toastOut {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(100px); }
+        }
+
+        .toast-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .toast.success .toast-icon {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .toast.warning .toast-icon {
+            background: rgba(249, 115, 22, 0.2);
+            color: #f97316;
+        }
+
+        .toast.info .toast-icon {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .toast-text {
+            font-size: 12px;
+            color: #71767b;
+        }
+
+        /* Custom Marker Styles */
+        .custom-marker {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 12px;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .custom-marker:hover {
+            transform: scale(1.2);
+        }
+
+        .custom-marker.critical {
+            background: #dc2626;
+            animation: markerPulse 1.5s infinite;
+        }
+
+        .custom-marker.high {
+            background: #f97316;
+            animation: markerPulse 2s infinite;
+        }
+
+        .custom-marker.medium {
+            background: #facc15;
+            color: #1a1a1a;
+        }
+
+        .custom-marker.low {
+            background: #22c55e;
+        }
+
+        @keyframes markerPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+        }
+
+        /* Popup Styles */
+        .leaflet-popup-content-wrapper {
+            background: #1d1f23;
+            border: 1px solid #2f3336;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .leaflet-popup-content {
+            margin: 14px;
+            color: #e7e9ea;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .leaflet-popup-tip {
+            background: #1d1f23;
+            border: 1px solid #2f3336;
+        }
+
+        .popup-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .popup-risk {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .popup-risk.critical {
+            background: rgba(220, 38, 38, 0.2);
+            color: #f87171;
+        }
+
+        .popup-risk.high {
+            background: rgba(249, 115, 22, 0.2);
+            color: #fb923c;
+        }
+
+        .popup-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .popup-stat {
+            text-align: center;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+        }
+
+        .popup-stat-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ff6b35;
+        }
+
+        .popup-stat-label {
+            font-size: 10px;
+            color: #71767b;
+            margin-top: 2px;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 20, 25, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .loading-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #2f3336;
+            border-top-color: #ff6b35;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 16px;
+            font-size: 14px;
+            color: #71767b;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1400px) {
+            .sidebar-left {
+                width: 260px;
+            }
+            .sidebar-right {
+                width: 320px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-section">
+            <div class="logo">☀️</div>
+            <div>
+                <div class="brand-name">HELIOS</div>
+                <div class="brand-subtitle">Heat Emergency Localized Intelligence Operating System</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="status-badge" onclick="toggleSystemStatus()">
+                <span id="statusText">Sistema Attivo</span>
+            </div>
+            <div class="datetime">
+                <div class="time" id="currentTime">14:32</div>
+                <div id="currentDate">Lun 14 Luglio 2025</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar-left">
+            <div class="filter-section">
+                <div class="filter-title">Area Geografica</div>
+                <select class="filter-select" id="aslFilter" onchange="filterByASL()">
+                    <option value="all">Campania (Tutte le ASL)</option>
+                    <option value="napoli1">ASL Napoli 1 Centro</option>
+                    <option value="napoli2">ASL Napoli 2 Nord</option>
+                    <option value="napoli3">ASL Napoli 3 Sud</option>
+                    <option value="caserta">ASL Caserta</option>
+                    <option value="salerno">ASL Salerno</option>
+                    <option value="avellino">ASL Avellino</option>
+                    <option value="benevento">ASL Benevento</option>
+                </select>
+                <select class="filter-select" id="comuneFilter" onchange="filterByComune()">
+                    <option value="all">Tutti i comuni</option>
+                </select>
+            </div>
+
+            <div class="filter-section">
+                <div class="filter-title">Finestra Temporale</div>
+                <select class="filter-select" id="timeWindowFilter" onchange="changeTimeWindow()">
+                    <option value="24">Prossime 24 ore</option>
+                    <option value="48" selected>Prossime 48 ore</option>
+                    <option value="72">Prossime 72 ore</option>
+                    <option value="168">Prossima settimana</option>
+                </select>
+                <div class="time-slider">
+                    <input type="range" id="timeSlider" min="0" max="48" value="0" oninput="updateTimeSlider()">
+                    <div class="time-labels">
+                        <span>Ora</span>
+                        <span>+24h</span>
+                        <span>+48h</span>
+                    </div>
+                </div>
+                <div class="current-time-display" id="sliderTimeDisplay">
+                    Visualizzazione: Ora attuale
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card danger" onclick="filterByRiskLevel('critical')">
+                    <div class="stat-value" id="redZonesCount">7</div>
+                    <div class="stat-label">Zone in Rosso</div>
+                </div>
+                <div class="stat-card warning" onclick="filterByRiskLevel('high')">
+                    <div class="stat-value" id="orangeZonesCount">12</div>
+                    <div class="stat-label">Zone in Arancione</div>
+                </div>
+                <div class="stat-card" onclick="showFragiliDetails()">
+                    <div class="stat-value" style="color: #22c55e;" id="fragiliCount">48.2K</div>
+                    <div class="stat-label">Fragili Allertati</div>
+                </div>
+                <div class="stat-card" onclick="showSMSDetails()">
+                    <div class="stat-value" style="color: #3b82f6;" id="smsRate">94%</div>
+                    <div class="stat-label">SMS Consegnati</div>
+                </div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-title">Livelli di Rischio</div>
+                <div class="legend-item active" onclick="toggleLegendFilter('critical')" id="legendCritical">
+                    <div class="legend-color red"></div>
+                    <span>Rosso – Rischio Critico (80-100)</span>
+                </div>
+                <div class="legend-item active" onclick="toggleLegendFilter('high')" id="legendHigh">
+                    <div class="legend-color orange"></div>
+                    <span>Arancione – Rischio Alto (60-79)</span>
+                </div>
+                <div class="legend-item active" onclick="toggleLegendFilter('medium')" id="legendMedium">
+                    <div class="legend-color yellow"></div>
+                    <span>Giallo – Rischio Moderato (40-59)</span>
+                </div>
+                <div class="legend-item active" onclick="toggleLegendFilter('low')" id="legendLow">
+                    <div class="legend-color green"></div>
+                    <span>Verde – Rischio Basso (0-39)</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Map Section -->
+        <main class="map-section">
+            <!-- Loading Overlay -->
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Caricamento dati geospaziali...</div>
+            </div>
+
+            <!-- Map -->
+            <div id="map"></div>
+
+            <!-- Custom Map Controls -->
+            <div class="map-controls">
+                <button class="map-btn" onclick="zoomIn()" title="Zoom In">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="map-btn" onclick="zoomOut()" title="Zoom Out">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button class="map-btn" id="layerBtn" onclick="toggleLayerPanel()" title="Layer">
+                    <i class="fas fa-layer-group"></i>
+                </button>
+                <button class="map-btn" onclick="resetView()" title="Reset Vista">
+                    <i class="fas fa-crosshairs"></i>
+                </button>
+                <button class="map-btn" id="heatmapBtn" onclick="toggleHeatmap()" title="Heatmap">
+                    <i class="fas fa-fire"></i>
+                </button>
+                <button class="map-btn" onclick="toggleFullscreen()" title="Fullscreen">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+
+            <!-- Layer Panel -->
+            <div class="layer-panel" id="layerPanel">
+                <div class="layer-panel-title">Livelli Mappa</div>
+                <div class="layer-option active" onclick="toggleLayer('heatmap')">
+                    <div class="layer-checkbox"></div>
+                    <span class="layer-label">Heatmap Rischio</span>
+                </div>
+                <div class="layer-option active" onclick="toggleLayer('markers')">
+                    <div class="layer-checkbox"></div>
+                    <span class="layer-label">Marker Zone</span>
+                </div>
+                <div class="layer-option active" onclick="toggleLayer('isole')">
+                    <div class="layer-checkbox"></div>
+                    <span class="layer-label">Isole di Calore</span>
+                </div>
+                <div class="layer-option" onclick="toggleLayer('ambulanze')">
+                    <div class="layer-checkbox"></div>
+                    <span class="layer-label">Ambulanze 118</span>
+                </div>
+                <div class="layer-option" onclick="toggleLayer('centri')">
+                    <div class="layer-checkbox"></div>
+                    <span class="layer-label">Centri Climatizzati</span>
+                </div>
+            </div>
+
+            <!-- Info Panel -->
+            <div class="info-panel" id="infoPanel">
+                <div class="info-panel-header">
+                    <div class="info-panel-title" id="infoPanelTitle">Dettagli Zona</div>
+                    <button class="info-panel-close" onclick="closeInfoPanel()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div id="infoPanelContent"></div>
+            </div>
+
+            <!-- Forecast Timeline -->
+            <div class="forecast-bar">
+                <div class="forecast-header">
+                    <div class="forecast-title">Previsione Ondata di Calore</div>
+                    <div class="forecast-date" id="forecastDate">Lun 14 – Mar 15 Luglio</div>
+                </div>
+                <div class="forecast-hours" id="forecastHours">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="sidebar-right">
+            <!-- Alerts Section -->
+            <div class="alerts-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Zone Critiche 24-48h
+                    </div>
+                    <span class="alert-count" id="alertCount">7</span>
+                </div>
+                <div id="alertsList">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- AI Recommendations -->
+            <div class="recommendations-section">
+                <div class="section-header">
+                    <div class="section-title ai">
+                        <i class="fas fa-robot"></i>
+                        Raccomandazioni AI
+                    </div>
+                </div>
+                <div id="recommendationsList">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Chat Section -->
+            <div class="chat-section">
+                <div class="chat-messages" id="chatMessages"></div>
+                <div class="chat-input-container">
+                    <input type="text" class="chat-input" id="chatInput" 
+                           placeholder="Chiedi a HELIOS..." 
+                           onkeypress="handleChatKeypress(event)">
+                    <button class="chat-btn" onclick="sendChatMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="chat-hint">Es: "Quali quartieri saranno in rosso domani pomeriggio?"</div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        // ============================================
+        // DATA - Zone di rischio in Campania
+        // ============================================
+        const zonesData = [
+            {
+                id: 1,
+                name: "Napoli Centro Storico",
+                comune: "Napoli",
+                asl: "napoli1",
+                lat: 40.8518,
+                lng: 14.2681,
+                risk: 94,
+                level: "critical",
+                temp: 41,
+                peakHour: "17:00",
+                fragili: 8420,
+                over80: 2180,
+                densita: "Alta",
+                vegetazione: "Bassa"
+            },
+            {
+                id: 2,
+                name: "Scampia - Secondigliano",
+                comune: "Napoli",
+                asl: "napoli1",
+                lat: 40.8950,
+                lng: 14.2550,
+                risk: 91,
+                level: "critical",
+                temp: 42,
+                peakHour: "16:00",
+                fragili: 6850,
+                over80: 1920,
+                densita: "Molto Alta",
+                vegetazione: "Molto Bassa"
+            },
+            {
+                id: 3,
+                name: "San Giovanni a Teduccio",
+                comune: "Napoli",
+                asl: "napoli1",
+                lat: 40.8350,
+                lng: 14.3100,
+                risk: 88,
+                level: "critical",
+                temp: 40,
+                peakHour: "17:00",
+                fragili: 4210,
+                over80: 980,
+                densita: "Alta",
+                vegetazione: "Bassa"
+            },
+            {
+                id: 4,
+                name: "Ponticelli",
+                comune: "Napoli",
+                asl: "napoli1",
+                lat: 40.8450,
+                lng: 14.3300,
+                risk: 85,
+                level: "critical",
+                temp: 40,
+                peakHour: "16:00",
+                fragili: 3890,
+                over80: 890,
+                densita: "Alta",
+                vegetazione: "Bassa"
+            },
+            {
+                id: 5,
+                name: "Bagnoli - Fuorigrotta",
+                comune: "Napoli",
+                asl: "napoli1",
+                lat: 40.8150,
+                lng: 14.1850,
+                risk: 82,
+                level: "critical",
+                temp: 39,
+                peakHour: "15:00",
+                fragili: 5120,
+                over80: 1340,
+                densita: "Media",
+                vegetazione: "Media"
+            },
+            {
+                id: 6,
+                name: "Pianura",
+                comune: "Napoli",
+                asl: "napoli1",
+                lat: 40.8580,
+                lng: 14.1750,
+                risk: 81,
+                level: "critical",
+                temp: 39,
+                peakHour: "16:00",
+                fragili: 3450,
+                over80: 780,
+                densita: "Media",
+                vegetazione: "Media"
+            },
+            {
+                id: 7,
+                name: "Vomero - Arenella",
+                comune: "Napoli",
+                asl: "napoli1",
+                lat: 40.8480,
+                lng: 14.2350,
+                risk: 80,
+                level: "critical",
+                temp: 38,
+                peakHour: "15:00",
+                fragili: 6780,
+                over80: 2100,
+                densita: "Media",
+                vegetazione: "Media"
+            },
+            {
+                id: 8,
+                name: "Torre Annunziata",
+                comune: "Torre Annunziata",
+                asl: "napoli3",
+                lat: 40.7510,
+                lng: 14.4450,
+                risk: 76,
+                level: "high",
+                temp: 39,
+                peakHour: "16:00",
+                fragili: 3540,
+                over80: 890,
+                densita: "Alta",
+                vegetazione: "Bassa"
+            },
+            {
+                id: 9,
+                name: "Casoria Centro",
+                comune: "Casoria",
+                asl: "napoli2",
+                lat: 40.9050,
+                lng: 14.2900,
+                risk: 72,
+                level: "high",
+                temp: 38,
+                peakHour: "15:00",
+                fragili: 2890,
+                over80: 720,
+                densita: "Alta",
+                vegetazione: "Bassa"
+            },
+            {
+                id: 10,
+                name: "Afragola",
+                comune: "Afragola",
+                asl: "napoli2",
+                lat: 40.9220,
+                lng: 14.3100,
+                risk: 71,
+                level: "high",
+                temp: 38,
+                peakHour: "16:00",
+                fragili: 2650,
+                over80: 610,
+                densita: "Media",
+                vegetazione: "Bassa"
+            },
+            {
+                id: 11,
+                name: "Giugliano in Campania",
+                comune: "Giugliano in Campania",
+                asl: "napoli2",
+                lat: 40.9280,
+                lng: 14.1950,
+                risk: 69,
+                level: "high",
+                temp: 37,
+                peakHour: "15:00",
+                fragili: 4120,
+                over80: 980,
+                densita: "Media",
+                vegetazione: "Media"
+            },
+            {
+                id: 12,
+                name: "Pozzuoli Centro",
+                comune: "Pozzuoli",
+                asl: "napoli2",
+                lat: 40.8260,
+                lng: 14.1220,
+                risk: 68,
+                level: "high",
+                temp: 37,
+                peakHour: "16:00",
+                fragili: 3210,
+                over80: 850,
+                densita: "Media",
+                vegetazione: "Media"
+            },
+            {
+                id: 13,
+                name: "Torre del Greco",
+                comune: "Torre del Greco",
+                asl: "napoli3",
+                lat: 40.7860,
+                lng: 14.3650,
+                risk: 67,
+                level: "high",
+                temp: 37,
+                peakHour: "15:00",
+                fragili: 3890,
+                over80: 1020,
+                densita: "Alta",
+                vegetazione: "Media"
+            },
+            {
+                id: 14,
+                name: "Portici",
+                comune: "Portici",
+                asl: "napoli3",
+                lat: 40.8180,
+                lng: 14.3400,
+                risk: 65,
+                level: "high",
+                temp: 36,
+                peakHour: "16:00",
+                fragili: 2340,
+                over80: 680,
+                densita: "Alta",
+                vegetazione: "Bassa"
+            },
+            {
+                id: 15,
+                name: "Ercolano",
+                comune: "Ercolano",
+                asl: "napoli3",
+                lat: 40.8060,
+                lng: 14.3530,
+                risk: 64,
+                level: "high",
+                temp: 36,
+                peakHour: "15:00",
+                fragili: 2120,
+                over80: 590,
+                densita: "Media",
+                vegetazione: "Media"
+            },
+            {
+                id: 16,
+                name: "Marano di Napoli",
+                comune: "Marano di Napoli",
+                asl: "napoli2",
+                lat: 40.8990,
+                lng: 14.1850,
+                risk: 62,
+                level: "high",
+                temp: 36,
+                peakHour: "16:00",
+                fragili: 2450,
+                over80: 580,
+                densita: "Media",
+                vegetazione: "Media"
+            },
+            {
+                id: 17,
+                name: "Casalnuovo di Napoli",
+                comune: "Casalnuovo di Napoli",
+                asl: "napoli2",
+                lat: 40.9120,
+                lng: 14.3520,
+                risk: 61,
+                level: "high",
+                temp: 36,
+                peakHour: "15:00",
+                fragili: 1980,
+                over80: 470,
+                densita: "Media",
+                vegetazione: "Media"
+            },
+            {
+                id: 18,
+                name: "Aversa Centro",
+                comune: "Aversa",
+                asl: "caserta",
+                lat: 40.9730,
+                lng: 14.2070,
+                risk: 60,
+                level: "high",
+                temp: 35,
+                peakHour: "16:00",
+                fragili: 2780,
+                over80: 720,
+                densita: "Media",
+                vegetazione: "Bassa"
+            },
+            {
+                id: 19,
+                name: "Caserta Centro",
+                comune: "Caserta",
+                asl: "caserta",
+                lat: 41.0742,
+                lng: 14.3332,
+                risk: 58,
+                level: "medium",
+                temp: 35,
+                peakHour: "15:00",
+                fragili: 3120,
+                over80: 890,
+                densita: "Media",
+                vegetazione: "Media"
+            },
+            {
+                id: 20,
+                name: "Salerno Centro",
+                comune: "Salerno",
+                asl: "salerno",
+                lat: 40.6824,
+                lng: 14.7681,
+                risk: 55,
+                level: "medium",
+                temp: 34,
+                peakHour: "16:00",
+                fragili: 4560,
+                over80: 1340,
+                densita: "Media",
+                vegetazione: "Media"
+            },
+            {
+                id: 21,
+                name: "Scafati",
+                comune: "Scafati",
+                asl: "salerno",
+                lat: 40.7530,
+                lng: 14.5280,
+                risk: 54,
+                level: "medium",
+                temp: 34,
+                peakHour: "15:00",
+                fragili: 1890,
+                over80: 520,
+                densita: "Media",
+                vegetazione: "Media"
+            },
+            {
+                id: 22,
+                name: "Cava de' Tirreni",
+                comune: "Cava de' Tirreni",
+                asl: "salerno",
+                lat: 40.7010,
+                lng: 14.7050,
+                risk: 48,
+                level: "medium",
+                temp: 33,
+                peakHour: "15:00",
+                fragili: 2340,
+                over80: 680,
+                densita: "Bassa",
+                vegetazione: "Alta"
+            },
+            {
+                id: 23,
+                name: "Benevento Centro",
+                comune: "Benevento",
+                asl: "benevento",
+                lat: 41.1297,
+                lng: 14.7826,
+                risk: 45,
+                level: "medium",
+                temp: 33,
+                peakHour: "15:00",
+                fragili: 2180,
+                over80: 650,
+                densita: "Bassa",
+                vegetazione: "Media"
+            },
+            {
+                id: 24,
+                name: "Avellino Centro",
+                comune: "Avellino",
+                asl: "avellino",
+                lat: 40.9146,
+                lng: 14.7906,
+                risk: 42,
+                level: "medium",
+                temp: 32,
+                                peakHour: "15:00",
+                fragili: 1980,
+                over80: 590,
+                densita: "Bassa",
+                vegetazione: "Alta"
+            },
+            {
+                id: 25,
+                name: "Sorrento",
+                comune: "Sorrento",
+                asl: "napoli3",
+                lat: 40.6263,
+                lng: 14.3758,
+                risk: 38,
+                level: "low",
+                temp: 31,
+                peakHour: "14:00",
+                fragili: 1240,
+                over80: 420,
+                densita: "Bassa",
+                vegetazione: "Alta"
+            },
+            {
+                id: 26,
+                name: "Amalfi",
+                comune: "Amalfi",
+                asl: "salerno",
+                lat: 40.6340,
+                lng: 14.6027,
+                risk: 32,
+                level: "low",
+                temp: 30,
+                peakHour: "14:00",
+                fragili: 580,
+                over80: 180,
+                densita: "Bassa",
+                vegetazione: "Alta"
+            },
+            {
+                id: 27,
+                name: "Positano",
+                comune: "Positano",
+                asl: "salerno",
+                lat: 40.6280,
+                lng: 14.4850,
+                risk: 28,
+                level: "low",
+                temp: 29,
+                peakHour: "14:00",
+                fragili: 320,
+                over80: 95,
+                densita: "Bassa",
+                vegetazione: "Alta"
+            }
+        ];
+
+        // Comuni per ASL
+        const comuniPerASL = {
+            all: ["Tutti i comuni"],
+            napoli1: ["Tutti i comuni", "Napoli"],
+            napoli2: ["Tutti i comuni", "Casoria", "Afragola", "Giugliano in Campania", "Pozzuoli", "Marano di Napoli", "Casalnuovo di Napoli"],
+            napoli3: ["Tutti i comuni", "Torre Annunziata", "Torre del Greco", "Portici", "Ercolano", "Sorrento"],
+            caserta: ["Tutti i comuni", "Caserta", "Aversa"],
+            salerno: ["Tutti i comuni", "Salerno", "Scafati", "Cava de' Tirreni", "Amalfi", "Positano"],
+            avellino: ["Tutti i comuni", "Avellino"],
+            benevento: ["Tutti i comuni", "Benevento"]
+        };
+
+        // Forecast data
+        const forecastData = [
+            { time: "14:00", temp: 38, risk: "critical" },
+            { time: "17:00", temp: 41, risk: "critical" },
+            { time: "20:00", temp: 36, risk: "critical" },
+            { time: "23:00", temp: 31, risk: "high" },
+            { time: "02:00", temp: 28, risk: "medium" },
+            { time: "05:00", temp: 26, risk: "low" },
+            { time: "08:00", temp: 30, risk: "medium" },
+            { time: "11:00", temp: 35, risk: "high" }
+        ];
+
+        // AI Recommendations
+        const recommendations = [
+            {
+                id: 1,
+                icon: "fa-ambulance",
+                title: "Pre-posizionamento 118",
+                text: "Spostare 2 ambulanze in standby presso Ospedale del Mare entro le 15:00. Storico indica +40% chiamate da Napoli Est durante picchi simili.",
+                applied: false
+            },
+            {
+                id: 2,
+                icon: "fa-snowflake",
+                title: "Centri Climatizzati",
+                text: "Attivare centro climatizzato presso biblioteca Scampia (cap. 80 persone). Alta concentrazione anziani soli nel raggio di 500m.",
+                applied: false
+            },
+            {
+                id: 3,
+                icon: "fa-phone",
+                title: "Chiamate Attive",
+                text: "Avviare chiamate di controllo verso 2.180 over-80 soli nel Centro Storico. Priorità massima per chi vive ai piani alti senza A/C.",
+                applied: false
+            },
+            {
+                id: 4,
+                icon: "fa-sms",
+                title: "Alert SMS Massivo",
+                text: "Inviare SMS preventivo a 48.200 cittadini fragili nelle zone rosse. Testo multilingue già preparato con consigli pratici.",
+                applied: false
+            },
+            {
+                id: 5,
+                icon: "fa-users",
+                title: "Allerta Caregiver",
+                text: "Notificare 12.400 caregiver registrati nelle zone ad alto rischio. Includere checklist di controllo per assistiti.",
+                applied: false
+            }
+        ];
+
+        // Chat responses
+        const chatResponses = {
+            "rosso domani": "Domani pomeriggio (15-18) saranno in allerta ROSSA: Napoli Centro Storico, Scampia-Secondigliano, San Giovanni a Teduccio, Ponticelli, Bagnoli-Fuorigrotta, Pianura e Vomero-Arenella. Popolazione fragile esposta: circa 38.700 persone.",
+            "napoli est": "Napoli Est (San Giovanni, Ponticelli, Barra) prevede rischio CRITICO con picco alle 17:00. Temperature percepite fino a 42°C. Consiglio pre-posizionamento ambulanze presso Ospedale del Mare.",
+            "ambulanze": "Attualmente 12 ambulanze operative nell'area metropolitana. Suggerisco di spostare 2 unità verso Napoli Est e 1 verso Scampia prima delle 15:00 per anticipare il picco di chiamate.",
+            "over 80": "Nelle zone rosse sono presenti 8.890 over-80 che vivono soli. Il 62% risiede ai piani superiori senza aria condizionata. Priorità per chiamate di controllo attive.",
+            "centri climatizzati": "Centri climatizzati attivabili: Biblioteca Scampia (80 posti), Centro Anziani Ponticelli (50 posti), Municipio San Giovanni (120 posti). Capacità totale: 250 persone.",
+            "default": "Analizzo i dati disponibili... Nelle prossime 48 ore prevediamo 7 zone in rischio critico e 12 in rischio alto. Vuoi dettagli su una specifica area o tipo di intervento?"
+        };
+
+        // ============================================
+        // GLOBAL VARIABLES
+        // ============================================
+        let map;
+        let heatLayer;
+        let markersLayer;
+        let markers = [];
+        let selectedZone = null;
+        let activeFilters = {
+            asl: 'all',
+            comune: 'all',
+            levels: ['critical', 'high', 'medium', 'low']
+        };
+        let currentForecastIndex = 1;
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            showLoading();
+            initMap();
+            initForecast();
+            initAlerts();
+            initRecommendations();
+            updateClock();
+            setInterval(updateClock, 1000);
+            setTimeout(hideLoading, 1500);
+        });
+
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('show');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('show');
+        }
+
+        // ============================================
+        // MAP INITIALIZATION
+        // ============================================
+        function initMap() {
+            // Initialize map centered on Campania
+            map = L.map('map', {
+                center: [40.8518, 14.2681],
+                zoom: 10,
+                zoomControl: false,
+                attributionControl: true
+            });
+
+            // Dark tile layer
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(map);
+
+            // Initialize layers
+            initHeatmap();
+            initMarkers();
+        }
+
+        function initHeatmap() {
+            // Create heatmap data from zones
+            const heatData = zonesData.map(zone => {
+                const intensity = zone.risk / 100;
+                return [zone.lat, zone.lng, intensity];
+            });
+
+            // Add additional heat points for more coverage
+            const additionalHeat = [
+                [40.8600, 14.2500, 0.8],
+                [40.8400, 14.2800, 0.85],
+                [40.8700, 14.2700, 0.75],
+                [40.8300, 14.2400, 0.7],
+                [40.8550, 14.3000, 0.8],
+                [40.8200, 14.2600, 0.65],
+                [40.8800, 14.2400, 0.7],
+                [40.8450, 14.2200, 0.6],
+                [40.8100, 14.3200, 0.75],
+                [40.8650, 14.1900, 0.65]
+            ];
+
+            const allHeatData = [...heatData, ...additionalHeat];
+
+            heatLayer = L.heatLayer(allHeatData, {
+                radius: 35,
+                blur: 25,
+                maxZoom: 12,
+                max: 1.0,
+                gradient: {
+                    0.0: '#22c55e',
+                    0.25: '#84cc16',
+                    0.5: '#facc15',
+                    0.7: '#f97316',
+                    0.85: '#ef4444',
+                    1.0: '#dc2626'
+                }
+            }).addTo(map);
+        }
+
+        function initMarkers() {
+            markersLayer = L.layerGroup().addTo(map);
+            
+            zonesData.forEach(zone => {
+                if (activeFilters.levels.includes(zone.level)) {
+                    addMarker(zone);
+                }
+            });
+        }
+
+        function addMarker(zone) {
+            const size = zone.level === 'critical' ? 32 : zone.level === 'high' ? 28 : 24;
+            
+            const icon = L.divIcon({
+                className: 'custom-marker-wrapper',
+                html: `<div class="custom-marker ${zone.level}" style="width:${size}px;height:${size}px;">!</div>`,
+                iconSize: [size, size],
+                iconAnchor: [size/2, size/2]
+            });
+
+            const marker = L.marker([zone.lat, zone.lng], { icon: icon })
+                .bindPopup(createPopupContent(zone), {
+                    maxWidth: 300,
+                    className: 'custom-popup'
+                })
+                .on('click', () => selectZone(zone));
+
+            marker.zoneData = zone;
+            markers.push(marker);
+            markersLayer.addLayer(marker);
+        }
+
+        function createPopupContent(zone) {
+            const riskLabel = zone.level === 'critical' ? 'CRITICO' : zone.level === 'high' ? 'ALTO' : zone.level === 'medium' ? 'MODERATO' : 'BASSO';
+            
+            return `
+                <div class="popup-title">${zone.name}</div>
+                <div class="popup-risk ${zone.level}">Rischio ${riskLabel} - ${zone.risk}/100</div>
+                <div class="popup-stats">
+                    <div class="popup-stat">
+                        <div class="popup-stat-value">${zone.temp}°C</div>
+                        <div class="popup-stat-label">Temp. Percepita</div>
+                    </div>
+                    <div class="popup-stat">
+                        <div class="popup-stat-value">${zone.peakHour}</div>
+                        <div class="popup-stat-label">Picco Previsto</div>
+                    </div>
+                    <div class="popup-stat">
+                        <div class="popup-stat-value">${zone.fragili.toLocaleString()}</div>
+                        <div class="popup-stat-label">Fragili</div>
+                    </div>
+                    <div class="popup-stat">
+                        <div class="popup-stat-value">${zone.over80.toLocaleString()}</div>
+                        <div class="popup-stat-label">Over-80 Soli</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // MAP CONTROLS
+        // ============================================
+        function zoomIn() {
+            map.zoomIn();
+            showToast('info', 'Zoom', 'Zoom aumentato');
+        }
+
+        function zoomOut() {
+            map.zoomOut();
+            showToast('info', 'Zoom', 'Zoom diminuito');
+        }
+
+        function resetView() {
+            map.setView([40.8518, 14.2681], 10);
+            showToast('info', 'Vista Reset', 'Mappa centrata sulla Campania');
+        }
+
+        function toggleHeatmap() {
+            const btn = document.getElementById('heatmapBtn');
+            if (map.hasLayer(heatLayer)) {
+                map.removeLayer(heatLayer);
+                btn.classList.remove('active');
+                showToast('info', 'Heatmap', 'Heatmap disattivata');
+            } else {
+                map.addLayer(heatLayer);
+                btn.classList.add('active');
+                showToast('info', 'Heatmap', 'Heatmap attivata');
+            }
+        }
+
+        function toggleLayerPanel() {
+            const panel = document.getElementById('layerPanel');
+            const btn = document.getElementById('layerBtn');
+            panel.classList.toggle('show');
+            btn.classList.toggle('active');
+        }
+
+        function toggleLayer(layerName) {
+            const options = document.querySelectorAll('.layer-option');
+            options.forEach(opt => {
+                if (opt.textContent.toLowerCase().includes(layerName.toLowerCase().substring(0, 4))) {
+                    opt.classList.toggle('active');
+                }
+            });
+
+            if (layerName === 'heatmap') {
+                toggleHeatmap();
+            } else if (layerName === 'markers') {
+                if (map.hasLayer(markersLayer)) {
+                    map.removeLayer(markersLayer);
+                } else {
+                    map.addLayer(markersLayer);
+                }
+            } else {
+                showToast('info', 'Layer', `Layer "${layerName}" aggiornato`);
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                showToast('info', 'Fullscreen', 'Modalità schermo intero attivata');
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // ============================================
+        // FILTERS
+        // ============================================
+        function filterByASL() {
+            const asl = document.getElementById('aslFilter').value;
+            activeFilters.asl = asl;
+            
+            // Update comuni dropdown
+            const comuneSelect = document.getElementById('comuneFilter');
+            comuneSelect.innerHTML = '';
+            
+            const comuni = comuniPerASL[asl] || comuniPerASL.all;
+            comuni.forEach(comune => {
+                const option = document.createElement('option');
+                option.value = comune === 'Tutti i comuni' ? 'all' : comune;
+                option.textContent = comune;
+                comuneSelect.appendChild(option);
+            });
+
+            updateMapMarkers();
+            updateStats();
+            updateAlerts();
+            
+            const aslName = document.getElementById('aslFilter').options[document.getElementById('aslFilter').selectedIndex].text;
+            showToast('success', 'Filtro Applicato', `Visualizzazione: ${aslName}`);
+        }
+
+        function filterByComune() {
+            const comune = document.getElementById('comuneFilter').value;
+            activeFilters.comune = comune;
+            
+            updateMapMarkers();
+            updateAlerts();
+            
+            if (comune !== 'all') {
+                const zone = zonesData.find(z => z.comune === comune);
+                if (zone) {
+                    map.setView([zone.lat, zone.lng], 13);
+                }
+                showToast('success', 'Filtro Applicato', `Comune: ${comune}`);
+            }
+        }
+
+        function changeTimeWindow() {
+            const hours = document.getElementById('timeWindowFilter').value;
+            const slider = document.getElementById('timeSlider');
+            slider.max = hours;
+            
+            showToast('info', 'Finestra Temporale', `Visualizzazione prossime ${hours} ore`);
+        }
+
+        function updateTimeSlider() {
+            const value = document.getElementById('timeSlider').value;
+            const display = document.getElementById('sliderTimeDisplay');
+            
+            if (value == 0) {
+                display.textContent = 'Visualizzazione: Ora attuale';
+            } else {
+                display.textContent = `Visualizzazione: +${value} ore da ora`;
+            }
+            
+            // Simulate changing risk levels based on time
+            updateHeatmapForTime(value);
+        }
+
+        function updateHeatmapForTime(hours) {
+            // Simulate different risk patterns for different times
+            const timeMultiplier = hours < 6 ? 1.1 : hours < 12 ? 0.9 : hours < 18 ? 1.0 : 0.85;
+            
+            // Update stats with simulated values
+            const redZones = Math.round(7 * timeMultiplier);
+            const orangeZones = Math.round(12 * timeMultiplier);
+            
+            document.getElementById('redZonesCount').textContent = redZones;
+            document.getElementById('orangeZonesCount').textContent = orangeZones;
+        }
+
+        function filterByRiskLevel(level) {
+            map.setView([40.8518, 14.2681], 11);
+            
+            // Highlight zones of this level
+            markers.forEach(marker => {
+                if (marker.zoneData.level === level) {
+                    marker.openPopup();
+                }
+            });
+            
+            showToast('warning', 'Filtro Rischio', `Evidenziate zone in ${level === 'critical' ? 'rosso' : 'arancione'}`);
+        }
+
+        function toggleLegendFilter(level) {
+            const legendItem = document.getElementById('legend' + level.charAt(0).toUpperCase() + level.slice(1));
+            legendItem.classList.toggle('active');
+            
+            const index = activeFilters.levels.indexOf(level);
+            if (index > -1) {
+                activeFilters.levels.splice(index, 1);
+            } else {
+                activeFilters.levels.push(level);
+            }
+            
+            updateMapMarkers();
+        }
+
+        function updateMapMarkers() {
+            // Clear existing markers
+            markersLayer.clearLayers();
+            markers = [];
+            
+            // Filter and add markers
+            zonesData.forEach(zone => {
+                let show = true;
+                
+                if (activeFilters.asl !== 'all' && zone.asl !== activeFilters.asl) {
+                    show = false;
+                }
+                
+                if (activeFilters.comune !== 'all' && zone.comune !== activeFilters.comune) {
+                    show = false;
+                }
+                
+                if (!activeFilters.levels.includes(zone.level)) {
+                    show = false;
+                }
+                
+                if (show) {
+                    addMarker(zone);
+                }
+            });
+        }
+
+        function updateStats() {
+            const filteredZones = zonesData.filter(zone => {
+                if (activeFilters.asl !== 'all' && zone.asl !== activeFilters.asl) return false;
+                return true;
+            });
+            
+            const redZones = filteredZones.filter(z => z.level === 'critical').length;
+            const orangeZones = filteredZones.filter(z => z.level === 'high').length;
+            const totalFragili = filteredZones.reduce((sum, z) => sum + z.fragili, 0);
+            
+            document.getElementById('redZonesCount').textContent = redZones;
+            document.getElementById('orangeZonesCount').textContent = orangeZones;
+            document.getElementById('fragiliCount').textContent = (totalFragili / 1000).toFixed(1) + 'K';
+        }
+
+        // ============================================
+        // ALERTS
+        // ============================================
+        function initAlerts() {
+            updateAlerts();
+        }
+
+        function updateAlerts() {
+            const alertsList = document.getElementById('alertsList');
+            alertsList.innerHTML = '';
+            
+            let filteredZones = zonesData
+                .filter(z => z.level === 'critical' || z.level === 'high')
+                .filter(z => {
+                    if (activeFilters.asl !== 'all' && z.asl !== activeFilters.asl) return false;
+                    if (activeFilters.comune !== 'all' && z.comune !== activeFilters.comune) return false;
+                    return true;
+                })
+                .sort((a, b) => b.risk - a.risk)
+                .slice(0, 8);
+            
+            document.getElementById('alertCount').textContent = filteredZones.length;
+            
+            filteredZones.forEach(zone => {
+                const card = document.createElement('div');
+                card.className = `alert-card ${zone.level}`;
+                card.onclick = () => selectZone(zone);
+                
+                card.innerHTML = `
+                    <div class="alert-header">
+                        <div class="alert-zone">${zone.name}</div>
+                        <span class="alert-risk-badge ${zone.level}">Rischio ${zone.risk}</span>
+                    </div>
+                    <div class="alert-details">
+                        <div class="alert-detail"><i class="fas fa-thermometer-full"></i> ${zone.temp}°C percepiti</div>
+                        <div class="alert-detail"><i class="fas fa-clock"></i> Picco h${zone.peakHour.split(':')[0]}</div>
+                    </div>
+                    <div class="alert-population">
+                        <strong>${zone.fragili.toLocaleString()}</strong> cittadini fragili • 
+                        <strong>${zone.over80.toLocaleString()}</strong> over-80 soli
+                    </div>
+                    <div class="alert-actions">
+                        <button class="alert-action-btn" onclick="event.stopPropagation(); sendAlert(${zone.id})">
+                            <i class="fas fa-bell"></i> Allerta
+                        </button>
+                        <button class="alert-action-btn primary" onclick="event.stopPropagation(); viewDetails(${zone.id})">
+                            <i class="fas fa-map-marker-alt"></i> Mappa
+                        </button>
+                    </div>
+                `;
+                
+                alertsList.appendChild(card);
+            });
+        }
+
+        function selectZone(zone) {
+            selectedZone = zone;
+            
+            // Update UI
+            document.querySelectorAll('.alert-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Center map on zone
+            map.setView([zone.lat, zone.lng], 13);
+            
+            // Find and open marker popup
+            markers.forEach(marker => {
+                if (marker.zoneData.id === zone.id) {
+                    marker.openPopup();
+                }
+            });
+            
+            // Show info panel
+            showInfoPanel(zone);
+        }
+
+        function showInfoPanel(zone) {
+            const panel = document.getElementById('infoPanel');
+            const title = document.getElementById('infoPanelTitle');
+            const content = document.getElementById('infoPanelContent');
+            
+            title.textContent = zone.name;
+            content.innerHTML = `
+                <div class="info-row">
+                    <span class="info-label">Livello Rischio</span>
+                    <span class="info-value ${zone.level}">${zone.risk}/100</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Temperatura Percepita</span>
+                    <span class="info-value">${zone.temp}°C</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Picco Previsto</span>
+                    <span class="info-value">${zone.peakHour}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Popolazione Fragile</span>
+                    <span class="info-value">${zone.fragili.toLocaleString()}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Over-80 Soli</span>
+                    <span class="info-value ${zone.level}">${zone.over80.toLocaleString()}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Densità Urbana</span>
+                    <span class="info-value">${zone.densita}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Copertura Verde</span>
+                    <span class="info-value">${zone.vegetazione}</span>
+                </div>
+            `;
+            
+            panel.classList.add('show');
+        }
+
+        function closeInfoPanel() {
+            document.getElementById('infoPanel').classList.remove('show');
+        }
+
+        function sendAlert(zoneId) {
+            const zone = zonesData.find(z => z.id === zoneId);
+            showToast('success', 'Alert Inviato', `SMS inviati a ${zone.fragili.toLocaleString()} cittadini in ${zone.name}`);
+        }
+
+        function viewDetails(zoneId) {
+            const zone = zonesData.find(z => z.id === zoneId);
+            selectZone(zone);
+        }
+
+        function showFragiliDetails() {
+            showToast('info', 'Cittadini Fragili', 'Database con 48.200 profili. Filtrati per patologie croniche, età >75, isolamento sociale.');
+        }
+
+        function showSMSDetails() {
+            showToast('success', 'Report SMS', 'Ultimo invio: 2h fa. 45.300 consegnati, 2.900 in coda. Tasso apertura: 78%');
+        }
+
+        // ============================================
+        // FORECAST
+        // ============================================
+        function initForecast() {
+            const container = document.getElementById('forecastHours');
+            container.innerHTML = '';
+            
+            forecastData.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = `forecast-hour ${index === currentForecastIndex ? 'active' : ''}`;
+                div.onclick = () => selectForecast(index);
+                
+                const riskLabel = item.risk === 'critical' ? 'Critico' : item.risk === 'high' ? 'Alto' : item.risk === 'medium' ? 'Moderato' : 'Basso';
+                
+                div.innerHTML = `
+                    <div class="forecast-time">${item.time}</div>
+                    <div class="forecast-temp">${item.temp}°</div>
+                    <div class="forecast-risk ${item.risk}">${riskLabel}</div>
+                `;
+                
+                container.appendChild(div);
+            });
+        }
+
+        function selectForecast(index) {
+            currentForecastIndex = index;
+            
+            document.querySelectorAll('.forecast-hour').forEach((el, i) => {
+                el.classList.toggle('active', i === index);
+            });
+            
+            const forecast = forecastData[index];
+            showToast('info', `Previsione ${forecast.time}`, `Temperatura: ${forecast.temp}°C - Rischio: ${forecast.risk}`);
+            
+            // Update time slider to match
+            const slider = document.getElementById('timeSlider');
+            slider.value = index * 3;
+            updateTimeSlider();
+        }
+
+        // ============================================
+        // RECOMMENDATIONS
+        // ============================================
+        function initRecommendations() {
+            const container = document.getElementById('recommendationsList');
+            container.innerHTML = '';
+            
+            recommendations.forEach(rec => {
+                const card = document.createElement('div');
+                card.className = `recommendation-card ${rec.applied ? 'applied' : ''}`;
+                card.id = `rec-${rec.id}`;
+                
+                card.innerHTML = `
+                    <div class="recommendation-header">
+                        <div class="recommendation-icon"><i class="fas ${rec.icon}"></i></div>
+                        <div class="recommendation-title">${rec.title}</div>
+                    </div>
+                    <div class="recommendation-text">${rec.text}</div>
+                    <div class="recommendation-apply" onclick="applyRecommendation(${rec.id})">
+                        <i class="fas ${rec.applied ? 'fa-check' : 'fa-play'}"></i>
+                        ${rec.applied ? 'Applicata' : 'Applica Raccomandazione'}
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        function applyRecommendation(id) {
+            const rec = recommendations.find(r => r.id === id);
+            rec.applied = !rec.applied;
+            
+            const card = document.getElementById(`rec-${id}`);
+            card.classList.toggle('applied', rec.applied);
+            
+            const applyBtn = card.querySelector('.recommendation-apply');
+            applyBtn.innerHTML = `
+                <i class="fas ${rec.applied ? 'fa-check' : 'fa-play'}"></i>
+                ${rec.applied ? 'Applicata' : 'Applica Raccomandazione'}
+            `;
+            
+            if (rec.applied) {
+                showToast('success', 'Raccomandazione Applicata', rec.title);
+            } else {
+                showToast('warning', 'Raccomandazione Annullata', rec.title);
+            }
+        }
+
+        // ============================================
+        // CHAT
+        // ============================================
+        function handleChatKeypress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.classList.add('show');
+            
+            // Add user message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'chat-message user';
+            userMsg.textContent = message;
+            messagesContainer.appendChild(userMsg);
+            
+            // Clear input
+            input.value = '';
+            
+            // Generate AI response
+            setTimeout(() => {
+                const response = getAIResponse(message);
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'chat-message ai';
+                aiMsg.textContent = response;
+                messagesContainer.appendChild(aiMsg);
+                
+                // Scroll to bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 800);
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function getAIResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            for (const [key, response] of Object.entries(chatResponses)) {
+                if (lowerMessage.includes(key)) {
+                    return response;
+                }
+            }
+            
+            return chatResponses.default;
+        }
+
+        // ============================================
+        // UTILITIES
+        // ============================================
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('currentTime').textContent = `${hours}:${minutes}`;
+            
+            const days = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+            const months = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 
+                           'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+            const dateStr = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+            document.getElementById('currentDate').textContent = dateStr;
+        }
+
+        function toggleSystemStatus() {
+            const statusText = document.getElementById('statusText');
+            const badge = statusText.parentElement;
+            
+            if (statusText.textContent === 'Sistema Attivo') {
+                statusText.textContent = 'In Pausa';
+                badge.style.background = 'rgba(249, 115, 22, 0.15)';
+                badge.style.color = '#f97316';
+                showToast('warning', 'Sistema in Pausa', 'Monitoraggio temporaneamente sospeso');
+            } else {
+                statusText.textContent = 'Sistema Attivo';
+                badge.style.background = 'rgba(0, 186, 124, 0.15)';
+                badge.style.color = '#00ba7c';
+                showToast('success', 'Sistema Attivo', 'Monitoraggio ripristinato');
+            }
+        }
+
+        function showToast(type, title, text) {
+            const container = document.getElementById('toastContainer');
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const iconClass = type === 'success' ? 'fa-check' : type === 'warning' ? 'fa-exclamation' : 'fa-info';
+            
+            toast.innerHTML = `
+                <div class="toast-icon"><i class="fas ${iconClass}"></i></div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-text">${text}</div>
+                </div>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Remove after animation
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Close panels when clicking outside
+        document.addEventListener('click', function(e) {
+            const layerPanel = document.getElementById('layerPanel');
+            const layerBtn = document.getElementById('layerBtn');
+            
+            if (!layerPanel.contains(e.target) && !layerBtn.contains(e.target)) {
+                layerPanel.classList.remove('show');
+                layerBtn.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
