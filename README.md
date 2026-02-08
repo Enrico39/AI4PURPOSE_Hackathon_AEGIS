@@ -6,8 +6,7 @@
 
 ---
 
-[**Prova ora la Dashboboard di Helios!**]([https://github.com/](https://helios.tiiny.site/))
-
+[**Prova ora la Dashboard di Helios!**](https://helios.tiiny.site/)
 
 ## 🚨 Il Problema
 Le ondate di calore sono il "killer silenzioso" del cambiamento climatico. Attualmente, i piani di emergenza si basano su allerte meteo generiche rivolte all'intera popolazione. Questo approccio reattivo porta a:
