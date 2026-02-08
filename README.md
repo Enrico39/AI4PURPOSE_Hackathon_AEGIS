@@ -19,7 +19,7 @@ Le ondate di calore sono il "killer silenzioso" del cambiamento climatico. Attua
 **Helios** non è una semplice app meteo. È un sistema operativo di **Data Fusion** che trasforma la gestione delle ondate di calore da reattiva a **predittiva**.
 
 Il sistema incrocia in tempo reale due layer di dati fondamentali:
-1.  **Dato Ambientale:** L'intensità delle Isole di Calore Urbane (**SUHI**) fornita dai satelliti di **Latitude 40**.
+1.  **Dato Ambientale:** L'intensità delle Isole di Calore Urbane (**SUHI**) fornita dai satelliti di **Latitudo 40**.
 2.  **Dato Clinico:** Il profilo di vulnerabilità dei cittadini estratto dai database sanitari regionali (**So.Re.Sa**).
 
 Il risultato è una **mappa di rischio chirurgica** che permette alla Protezione Civile e al 118 di intervenire *prima* che si verifichi l'emergenza clinica.
@@ -32,8 +32,8 @@ Helios calcola un **Indice di Priorità di Intervento** basato sulla seguente lo
 
 > **RISCHIO = (SUHI Ambientale) x (Vettore Vulnerabilità)**
 
-### 1. Layer Ambientale (Latitude 40)
-Utilizziamo i dati satellitari Sentinel-2 elaborati dall'AI di Latitude 40:
+### 1. Layer Ambientale (Latitudo 40)
+Utilizziamo i dati satellitari Sentinel-2 elaborati dall'AI di Latitudo 40:
 * **SUHI (Surface Urban Heat Island):** Identifica con precisione le zone dove asfalto e cemento trattengono il calore.
 
 ### 2. Layer Sanitario (Simulazione So.Re.Sa.)
