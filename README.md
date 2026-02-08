@@ -71,6 +71,34 @@ Helios è progettato secondo i principi di **Privacy by Design** per garantire l
 - **Last Mile Decryption**:  
   L'identità del paziente e l'indirizzo esatto vengono decriptati solo sul tablet dell'operatore di soccorso nel momento in cui scatta un intervento effettivo.
 
+---
+
+## 🛠️ Simulazione Dati \& Setup (Data Binding)
+
+Il file presente nella repository **`Data_binding_SUHI-Soresa`** rappresenta il cuore algoritmico della nostra **Proof of Concept (PoC)**.
+
+Poiché l’accesso ai dati sanitari reali (SINFONIA / So.Re.Sa.) è strettamente regolamentato, questo script esegue una **simulazione tecnica** che replica il comportamento del sistema su dati sintetici.
+
+## ⚙️ Funzionalità
+
+- **Caricamento della mappa reale SUHI** (dato fisico satellitare fornito da [Latitudo 40](https://www.latitudo40.com/)).
+- **Generazione di un dataset di pazienti sintetici (mock data)** geolocalizzati casualmente sull’area urbana, simulando cluster di fragilità (es. età, patologie).
+- **Esecuzione dell’algoritmo di Data Fusion** per assegnare a ogni *paziente virtuale* un livello di rischio termico basato sulla posizione.
+
+
+## 📦 Requisiti
+
+Per eseguire lo script di simulazione in locale e generare la mappa tattica, assicurati di avere installato le seguenti librerie Python:
+
+```bash
+pip install rasterio matplotlib numpy
+```
+
+> **Nota:**
+> - Lo script richiede **Python 3.9 o superiore**.
+> - Il file `.tif` della mappa SUHI deve essere posizionato nella cartella `data/`, come indicato nello script principale.
+
+
 ## 👥 Team AEGIS
 - **Beniamino Nardone**   
 - **Enrico Madonna**   
